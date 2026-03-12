@@ -1,5 +1,6 @@
 ---
 title: "Project Proposal STAT 405"
+<<<<<<< HEAD
 author: "Kelly-Ann Lessard, Qinxin Liu, and Griffin McDonald"
 date: "`r Sys.Date()`"
 output: html_document---
