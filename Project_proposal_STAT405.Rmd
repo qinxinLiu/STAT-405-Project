@@ -1,9 +1,9 @@
 ---
 title: "Project Proposal STAT 405"
-<<<<<<< HEAD
 author: "Kelly-Ann Lessard, Qinxin Liu, and Griffin McDonald"
 date: "`r Sys.Date()`"
-output: html_document---
+output: html_document
+---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -28,21 +28,11 @@ Our preferred dataset is Pharmacokinetic dataset containing 16 subjects with sin
 
 The dataset comes from Centera University. It can be found in the *Certera.RsNLME* package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
 
-```{r data1, echo=FALSE}
-#head(data_df) ####
-install.packages("Certara.RsNLME")
+````{r data1, echo=FALSE}
+#install.packages("Certara.RsNLME") run in console
 library(Certara.RsNLME)
 head(pkData)
-#  Subject Nom_Time Act_Time Amount  Conc   Age BodyWeight Gender
-#    <dbl>    <dbl>    <dbl>  <dbl> <dbl> <dbl>      <dbl> <chr> 
-#1       1        0     0     25000  2010    22         73 male  
-#2       1        1     0.26     NA  1330    22         73 male  
-#3       1        1     1.1      NA   565    22         73 male  
-#4       1        2     2.1      NA   216    22         73 male  
-#5       1        4     4.13     NA   180    22         73 male  
-#6       1        8     8.17     NA   120    22         73 male  
-```
-
+````
 Our backup dataset is ####. **Description ####** It's URL is <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>. 
 
 ```{r data2, echo=FALSE}
@@ -64,8 +54,15 @@ head(data)
 **Explanation ####**
 
 
+
 ## Methodology
-**Plan ####**
+We will fit two models: a one-compartment pharmacokinetics model and a mixed-effects model. 
+
+### One-Compartment Pharmacokinetics Model
+For the one-compartment pharmacokinetics model, we will compute the posterior using two methods: HMC (in Stan) and variational inference.
+
+
+### Mixed-Effects Model
 
 
 ## Contribution Plan
