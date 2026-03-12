@@ -61,7 +61,7 @@ head(data)
 
 
 ## Scientific Question
-Which modelling approach provides a better fit on drug concentration data: a mechanistic one-comparmental model or a mixed-effects model?
+Which modelling approach provides a better fit on drug concentration data: a mechanistic one-comparmental model or a mixed-effects model? 
 
 **Explanation ####**
 
