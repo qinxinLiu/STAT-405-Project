@@ -34,7 +34,15 @@ library(Certara.RsNLME)
 head(pkData)
 ```
 
-Our backup dataset is ####. **Description ####** It's URL is <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>. 
+Our backup dataset is Pharmacokinetics dataset containing 12 subjects with single Theophylline dose. It contains 132 rows and 5 variables. The variables are:
+- Subject: The ID of subject
+- Wt: The weight of the subject
+- Dose: The amount of drug intake
+- Time: The measurement time of drug concentration 
+- conc: The drug concentration in the blood
+
+The dataset is obtained from Kaggle. It can be accessed through the URL: <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>.
+
 
 ```{r data2, echo=TRUE}
 data = read.csv("Downloads/Theoph.csv")
