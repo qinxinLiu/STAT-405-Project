@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 title: "Project Proposal STAT 405"
 author: "Kelly-Ann Lessard, Qinxin Liu, and Griffin McDonald"
@@ -16,6 +15,8 @@ The link for the public repository containing our project is <https://github.com
 
 ## Datasets
 
+### Preferred Dataset
+
 Our preferred dataset is Pharmacokinetic dataset containing 16 subjects with single bolus dose. It has 112 rows and 8 variables. The variables are:
   
 - Subject: The ID of the subject
@@ -27,35 +28,36 @@ Our preferred dataset is Pharmacokinetic dataset containing 16 subjects with sin
 - BodyWeight: The weight of the subject
 - Gender: The gender of the subject (male or female)
 
-The dataset comes from Centera University. It can be found in the *Certera.RsNLME* package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
+The dataset comes from Centera University. It can be found in the *Certera.RsNLME* package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. Here is a preview of the dataset:
 
-````{r data1, echo=FALSE}
+````{r data1, echo=FALSE, warning=FALSE}
 #install.packages("Certara.RsNLME") run in console
 library(Certara.RsNLME)
 head(pkData)
 ````
 
+### Backup Dataset
 
-Our backup dataset is ####. **Description ####** It's URL is <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>. 
+Our backup dataset is Pharmacokinetics of Theophylline. It contains 132 rows and 5 variables. The variables are:
+
+- Subject: The ID of subject
+- Wt: The weight of the subject
+- Dose: The amount of drug intake
+- Time: The measurement time of drug concentration 
+- conc: The drug concentration in the blood
+
+The dataset is obtained from Kaggle. It can be accessed through the URL: <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>. The first few rows of the dataset are:
+
 
 ```{r data2, echo=FALSE}
-#head(data_df) ####
-data = read.csv("Downloads/Theoph.csv")
+data = read.csv("data/Theoph.csv")
 data <- data[, -1]
 head(data)
-#  Subject   Wt Dose Time  conc
-#1       1 79.6 4.02 0.00  0.74
-#2       1 79.6 4.02 0.25  2.84
-#3       1 79.6 4.02 0.57  6.57
-#4       1 79.6 4.02 1.12 10.50
-#5       1 79.6 4.02 2.02  9.66
-#6       1 79.6 4.02 3.82  8.58
 ```
 
 
 ## Scientific Question
-Which modelling approach provides a better fit on drug concentration data: a mechanistic one-comparmental model or a mixed-effects model?
-
+How does inter-individual variability impact the pharmacokinetic profile of the study drug, and how do sampling-based versus optimization-based Bayesian inference methods compare in efficiency and accuracy when estimating these hierarchical population parameters?
 
 
 ## Methodology
@@ -69,3 +71,4 @@ For the one-compartment pharmacokinetics model, we will compute the posterior us
 
 
 ## Contribution Plan
+
