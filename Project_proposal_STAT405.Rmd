@@ -39,6 +39,8 @@ Our backup dataset is ####. **Description ####** It's URL is <https://www.kaggle
 
 
 ## Scientific Question
+How do age, body weight, and gender affect k y pharmacokinetic parameters such as absorption rate, clearance, and volume of distribution?
+
 **Explanation ####**
 
 
