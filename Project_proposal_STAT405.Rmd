@@ -16,16 +16,17 @@ The link for the public repository containing our project is <https://github.com
 ## Datasets
 
 Our preferred dataset is Pharmacokinetic dataset containing 16 subjects with single bolus dose. It has 112 rows and 8 variables. The variables are:
+  
 - Subject: The ID of the subject
-- Nom_Time: Nominal Time
-- Act_Time: Actual Time
-- Amount: Amount of dose
-- Conc: Observations of drug concentration in blood
-- Age: Age
-- BodyWeight: Body weight
-- Gender: Gender ("male", "female")
+- Nom_Time: The nominal time (intended time)
+- Act_Time: The actual time
+- Amount: The amount of drug given
+- Conc: The drug concentration in the blood
+- Age: The age of the subject
+- BodyWeight: The weight of the subject
+- Gender: The gender of the subject (male or female)
 
-It is in the Certera.RsNLME package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
+The dataset comes from Centera University. It can be found in the *Certera.RsNLME* package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
 
 ```{r data1, echo=FALSE}
 #head(data_df) ####
