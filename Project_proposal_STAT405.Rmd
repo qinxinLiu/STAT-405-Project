@@ -15,13 +15,23 @@ The link for the public repository containing our project is <https://github.com
 
 ## Datasets
 
-Our preferred dataset is ####. **Description ####** It's URL is <####>. 
+Our preferred dataset is Pharmacokinetic dataset containing 16 subjects with single bolus dose. It has 112 rows and 8 variables. The variables are:
+- Subject: The ID of the subject
+- Nom_Time: Nominal Time
+- Act_Time: Actual Time
+- Amount: Amount of dose
+- Conc: Observations of drug concentration in blood
+- Age: Age
+- BodyWeight: Body weight
+- Gender: Gender ("male", "female")
+
+It is in the Certera.RsNLME package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
 
 ```{r data1, echo=FALSE}
 #head(data_df) ####
 ```
 
-Our backup dataset is ####. **Description ####** It's URL is <####>. 
+Our backup dataset is ####. **Description ####** It's URL is <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>. 
 
 ```{r data2, echo=FALSE}
 #head(data_df) ####
