@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "Project Proposal STAT 405"
 author: "Kelly-Ann Lessard, Qinxin Liu, and Griffin McDonald"
@@ -51,7 +52,7 @@ head(data)
 
 
 ## Scientific Question
-**Explanation ####**
+Which modelling approach provides a better fit on drug concentration data: a mechanistic one-comparmental model or a mixed-effects model?
 
 
 
