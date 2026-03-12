@@ -16,25 +16,47 @@ The link for the public repository containing our project is <https://github.com
 ## Datasets
 
 Our preferred dataset is Pharmacokinetic dataset containing 16 subjects with single bolus dose. It has 112 rows and 8 variables. The variables are:
+  
 - Subject: The ID of the subject
-- Nom_Time: Nominal Time
-- Act_Time: Actual Time
-- Amount: Amount of dose
-- Conc: Observations of drug concentration in blood
-- Age: Age
-- BodyWeight: Body weight
-- Gender: Gender ("male", "female")
+- Nom_Time: The nominal time (intended time)
+- Act_Time: The actual time
+- Amount: The amount of drug given
+- Conc: The drug concentration in the blood
+- Age: The age of the subject
+- BodyWeight: The weight of the subject
+- Gender: The gender of the subject (male or female)
 
-It is in the Certera.RsNLME package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
+The dataset comes from Centera University. It can be found in the *Certera.RsNLME* package. The URL of the documentation of this package is <https://rdrr.io/cran/Certara.RsNLME/man/pkData.html>. 
 
 ```{r data1, echo=FALSE}
 #head(data_df) ####
+install.packages("Certara.RsNLME")
+library(Certara.RsNLME)
+head(pkData)
+#  Subject Nom_Time Act_Time Amount  Conc   Age BodyWeight Gender
+#    <dbl>    <dbl>    <dbl>  <dbl> <dbl> <dbl>      <dbl> <chr> 
+#1       1        0     0     25000  2010    22         73 male  
+#2       1        1     0.26     NA  1330    22         73 male  
+#3       1        1     1.1      NA   565    22         73 male  
+#4       1        2     2.1      NA   216    22         73 male  
+#5       1        4     4.13     NA   180    22         73 male  
+#6       1        8     8.17     NA   120    22         73 male  
 ```
 
 Our backup dataset is ####. **Description ####** It's URL is <https://www.kaggle.com/datasets/ukveteran/pharmacokinetics-of-theophylline>. 
 
 ```{r data2, echo=FALSE}
 #head(data_df) ####
+data = read.csv("Downloads/Theoph.csv")
+data <- data[, -1]
+head(data)
+#  Subject   Wt Dose Time  conc
+#1       1 79.6 4.02 0.00  0.74
+#2       1 79.6 4.02 0.25  2.84
+#3       1 79.6 4.02 0.57  6.57
+#4       1 79.6 4.02 1.12 10.50
+#5       1 79.6 4.02 2.02  9.66
+#6       1 79.6 4.02 3.82  8.58
 ```
 
 
