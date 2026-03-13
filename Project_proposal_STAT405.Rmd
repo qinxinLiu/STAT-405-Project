@@ -72,7 +72,7 @@ $$u'_{cent}(t) = - \frac{CL}{V_{cent}}u_{cent}(t).$$
 In contrast, for the Theophylline dataset, the drug is administered orally, the model will include an absorption stage in gut. The equations are (@margossian2022torsten1):
 $$u'_{gut}(t) = -k_a u_{gut}(t),$$
 $$u'_{cent}(t) = -k_a u_{gut}(t) - \frac{CL}{V_{cent}}u_{cent}(t).$$
-Here, $u(t)$ denotes the drug mass ($mg$) at the time $t$ and the corresponding concentration is given by: $$u_{cent}(t) = \frac{\text{conc}_{cent}(t)}{V_{cent}}.$$
+Here, $u(t)$ denotes the drug mass ($mg$) at the time $t$ and the corresponding concentration is given by: $$ \text{conc}_{cent}(t) = \frac{u_{cent}(t)}{V_{cent}}.$$
 The model parameters are the absorption rate $k_a$ ($h^{-1}$), the volume of compartment $V$ ($L$),and the clearance rate $CL$ ($L/h$). The main difference between complete pooling and hierarchical modeling lies in how these parameters are modeled.
 
 ### Posterior Inference Methods
