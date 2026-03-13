@@ -61,13 +61,13 @@ How does inter-individual variability impact the pharmacokinetic profile of the 
 
 
 ## Methodology
-We will fit two models: a one-compartment pharmacokinetics model and a mixed-effects model. 
+We are interested in implementing a one-compartment pharmacokinetics models. Two versions of this model will compared: a complete pooling model and a hierarchical one. Moreover, two different posterior inference methods will be used.
 
 ### One-Compartment Pharmacokinetics Model
-For the one-compartment pharmacokinetics model, we will compute the posterior using two methods: HMC (in Stan) and variational inference.
+Pharmacokinetics models are used to describe the change in drug concentration in the body over time. A one-compartment model assumes that the patient's body is one big compartment. Thus the drug concentration is uniform throughout it. The complete pooling model assumes that there is no variability between the individuals, whereas the hierarchical model allows for this variability. To assess the quality of the fit of the model, posterior predictive checks will be performed. Furthermore, the predictive performance of both models will be compared using leave-one-out cross-validation.
 
-
-### Mixed-Effects Model
+### Posterior Inference Methods
+The two posterior inference methods that will be compared are: Hamiltonian Monte Carlo (a sampling-based method), implemented in Stan, and variational inference (an optimization-based method). Convergence of HMC will be assessed with the effective sample size and trace plots. For the variational inference, we will look at the ELBO convergence. The runtime and posterior variance of the two posterior inference methods will be compared.
 
 
 ## Contribution Plan
