@@ -62,7 +62,7 @@ How does inter-individual variability impact the pharmacokinetic profile of the 
 
 
 ## Methodology
-
+We are interested in implementing a one-compartment pharmacokinetics models. Two versions of this model will compared: a complete pooling model and a hierarchical one. Moreover, two different posterior inference methods will be used.
 
 ### One-Compartment Pharmacokinetics Model
 Pharmacokinetics models are used to describe the change in drug concentration in the body over time. A one-compartment model assumes that the patient's body is one big compartment. Thus the drug concentration is uniform throughout it. The complete pooling model assumes that there is no variability between the individuals, whereas the hierarchical model allows for this variability. To assess the quality of the fit of the model, posterior predictive checks will be performed. Furthermore, the predictive performance of both models will be compared using leave-one-out cross-validation.
@@ -78,6 +78,6 @@ The two posterior inference methods that will be compared are: Hamiltonian Monte
 
 
 ## Contribution Plan
-
+All members will work on all parts of the assignment, however the Variational inference will be more heavily worked on by Kelly-Ann and Griffin, and the HMC by Jessie. The writeup will be split into segments (ie intro, HMC+Varitaional methods, choices of priors, analysis of posteriors, conclusion) and divided equally as well.
 
 ## References

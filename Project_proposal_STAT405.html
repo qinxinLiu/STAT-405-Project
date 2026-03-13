@@ -11,7 +11,7 @@
 
 <meta name="author" content="Kelly-Ann Lessard, Qinxin Liu, and Griffin McDonald" />
 
-<meta name="date" content="2026-03-13" />
+<meta name="date" content="2026-03-12" />
 
 <title>Project Proposal STAT 405</title>
 
@@ -253,29 +253,6 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-
-div.csl-bib-body { }
-div.csl-entry {
-clear: both;
-margin-bottom: 0em;
-}
-.hanging div.csl-entry {
-margin-left:2em;
-text-indent:-2em;
-}
-div.csl-left-margin {
-min-width:2em;
-float:left;
-}
-div.csl-right-inline {
-margin-left:2em;
-padding-left:1em;
-}
-div.csl-indent {
-margin-left: 2em;
-}
-</style>
 
 
 
@@ -376,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">Project Proposal STAT 405</h1>
 <h4 class="author">Kelly-Ann Lessard, Qinxin Liu, and Griffin
 McDonald</h4>
-<h4 class="date">2026-03-13</h4>
+<h4 class="date">2026-03-12</h4>
 
 </div>
 
@@ -446,6 +423,10 @@ accuracy when estimating these hierarchical population parameters?</p>
 </div>
 <div id="methodology" class="section level2">
 <h2>Methodology</h2>
+<p>We are interested in implementing a one-compartment pharmacokinetics
+models. Two versions of this model will compared: a complete pooling
+model and a hierarchical one. Moreover, two different posterior
+inference methods will be used.</p>
 <div id="one-compartment-pharmacokinetics-model" class="section level3">
 <h3>One-Compartment Pharmacokinetics Model</h3>
 <p>Pharmacokinetics models are used to describe the change in drug
@@ -457,11 +438,6 @@ the hierarchical model allows for this variability. To assess the
 quality of the fit of the model, posterior predictive checks will be
 performed. Furthermore, the predictive performance of both models will
 be compared using leave-one-out cross-validation.</p>
-<p>The equations of one-compartment model with first order absorption
-are (<span class="citation">Margossian, Zhang, and Gillespie
-(2022)</span>): <span class="math display">\[u&#39;_{gut} = -k_a
-u_{gut}(t)\]</span> <span class="math display">\[u&#39;_{cent} = -k_a
-u_{gut}(t) - \frac{CL}{V_{cent}}u_{cent}(t)\]</span></p>
 </div>
 <div id="posterior-inference-methods" class="section level3">
 <h3>Posterior Inference Methods</h3>
@@ -476,16 +452,6 @@ will be compared.</p>
 </div>
 <div id="contribution-plan" class="section level2">
 <h2>Contribution Plan</h2>
-</div>
-<div id="references" class="section level2 unnumbered">
-<h2 class="unnumbered">References</h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
-<div id="ref-margossian2022torsten1" class="csl-entry">
-Margossian, Charles C., Yi Zhang, and William R. Gillespie. 2022.
-<span>“Flexible and Efficient Bayesian Pharmacometrics Modeling Using
-Stan and Torsten, Part i.”</span> <em>arXiv</em>.
-</div>
-</div>
 </div>
 
 
