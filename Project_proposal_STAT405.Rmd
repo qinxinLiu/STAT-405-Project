@@ -78,6 +78,6 @@ The two posterior inference methods that will be compared are: Hamiltonian Monte
 
 
 ## Contribution Plan
-
+All members will work on all parts of the assignment, however the Variational inference will be more heavily worked on by Kelly-Ann and Griffin, and the HMC by Jessie. The writeup will be split into segments (ie intro, HMC+Varitaional methods, choices of priors, analysis of posteriors, conclusion) and divided equally as well.
 
 ## References
