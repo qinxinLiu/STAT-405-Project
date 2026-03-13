@@ -67,11 +67,13 @@ We are interested in implementing a one-compartment pharmacokinetics models. Two
 ### One-Compartment Pharmacokinetics Model
 Pharmacokinetics models are used to describe the change in drug concentration in the body over time. A one-compartment model assumes that the patient's body is one big compartment. Thus the drug concentration is uniform throughout it. The complete pooling model assumes that there is no variability between the individuals, whereas the hierarchical model allows for this variability. To assess the quality of the fit of the model, posterior predictive checks will be performed. Furthermore, the predictive performance of both models will be compared using leave-one-out cross-validation.
 
-The equations of one-compartment model with first order absorption are (@margossian2022torsten1):
-$$u_{cent} = \frac{\text{conc}_{cent}}{V_{cent}},$$
+For the bolus dataset, the drug is administered intravenously, so the one-compartment model only includes a clearance process. The equations of one-compartment model is (@margossian2022torsten1):
+$$u'_{cent}(t) = - \frac{CL}{V_{cent}}u_{cent}(t).$$
+In contrast, for the Theophylline dataset, the drug is administered orally, the model will include an absorption stage in gut. The equations are (@margossian2022torsten1):
 $$u'_{gut}(t) = -k_a u_{gut}(t),$$
 $$u'_{cent}(t) = -k_a u_{gut}(t) - \frac{CL}{V_{cent}}u_{cent}(t).$$
-The model describes how a drug is absorbed in the gut and then transitions into a single central compartment, and be cleared from the body across time. Here, $u$ denotes the drug mass ($mg$). The model parameters are the absorption rate $k_a$ ($h^{-1}$), the volume of compartment $V$ ($L$),and the clearance rate $CL$ ($L/h$). The main difference between complete pooling and hierarchical modeling lies in how these parameters are modeled.
+Here, $u(t)$ denotes the drug mass ($mg$) at the time $t$ and the corresponding concentration is given by: $$u_{cent}(t) = \frac{\text{conc}_{cent}(t)}{V_{cent}}.$$
+The model parameters are the absorption rate $k_a$ ($h^{-1}$), the volume of compartment $V$ ($L$),and the clearance rate $CL$ ($L/h$). The main difference between complete pooling and hierarchical modeling lies in how these parameters are modeled.
 
 ### Posterior Inference Methods
 The two posterior inference methods that will be compared are: Hamiltonian Monte Carlo (a sampling-based method), implemented in Stan, and variational inference (an optimization-based method). Convergence of HMC will be assessed with the effective sample size and trace plots. For the variational inference, we will look at the ELBO convergence. The runtime and posterior variance of the two posterior inference methods will be compared.

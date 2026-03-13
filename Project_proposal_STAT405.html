@@ -11,7 +11,7 @@
 
 <meta name="author" content="Kelly-Ann Lessard, Qinxin Liu, and Griffin McDonald" />
 
-<meta name="date" content="2026-03-12" />
+<meta name="date" content="2026-03-13" />
 
 <title>Project Proposal STAT 405</title>
 
@@ -253,6 +253,29 @@ if (window.hljs) {
 
 
 
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
 
 
 
@@ -353,7 +376,7 @@ display: none;
 <h1 class="title toc-ignore">Project Proposal STAT 405</h1>
 <h4 class="author">Kelly-Ann Lessard, Qinxin Liu, and Griffin
 McDonald</h4>
-<h4 class="date">2026-03-12</h4>
+<h4 class="date">2026-03-13</h4>
 
 </div>
 
@@ -438,6 +461,19 @@ the hierarchical model allows for this variability. To assess the
 quality of the fit of the model, posterior predictive checks will be
 performed. Furthermore, the predictive performance of both models will
 be compared using leave-one-out cross-validation.</p>
+<p>For the bolus dataset, the drug is administered intravenously, so the
+one-compartment model only includes a clearance process. The equations
+of one-compartment model is (<span class="citation">Margossian, Zhang,
+and Gillespie (2022)</span>): <span class="math display">\[u&#39;_{cent}(t) = -
+\frac{CL}{V_{cent}}u_{cent}(t).\]</span> In contrast, for the
+Theophylline dataset, the drug is administered orally, the model will
+include an absorption stage in gut. The equations are (<span class="citation">Margossian, Zhang, and Gillespie (2022)</span>): <span class="math display">\[u&#39;_{gut}(t) = -k_a u_{gut}(t),\]</span> <span class="math display">\[u&#39;_{cent}(t) = -k_a u_{gut}(t) -
+\frac{CL}{V_{cent}}u_{cent}(t).\]</span> Here, <span class="math inline">\(u(t)\)</span> denotes the drug mass (<span class="math inline">\(mg\)</span>) at the time <span class="math inline">\(t\)</span> and the corresponding concentration is
+given by: <span class="math display">\[u_{cent}(t) =
+\frac{\text{conc}_{cent}(t)}{V_{cent}}.\]</span> The model parameters
+are the absorption rate <span class="math inline">\(k_a\)</span> (<span class="math inline">\(h^{-1}\)</span>), the volume of compartment <span class="math inline">\(V\)</span> (<span class="math inline">\(L\)</span>),and the clearance rate <span class="math inline">\(CL\)</span> (<span class="math inline">\(L/h\)</span>). The main difference between
+complete pooling and hierarchical modeling lies in how these parameters
+are modeled.</p>
 </div>
 <div id="posterior-inference-methods" class="section level3">
 <h3>Posterior Inference Methods</h3>
@@ -452,6 +488,21 @@ will be compared.</p>
 </div>
 <div id="contribution-plan" class="section level2">
 <h2>Contribution Plan</h2>
+<p>All members will work on all parts of the assignment, however the
+Variational inference will be more heavily worked on by Kelly-Ann and
+Griffin, and the HMC by Jessie. The writeup will be split into segments
+(ie intro, HMC+Varitaional methods, choices of priors, analysis of
+posteriors, conclusion) and divided equally as well.</p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-margossian2022torsten1" class="csl-entry">
+Margossian, Charles C., Yi Zhang, and William R. Gillespie. 2022.
+<span>“Flexible and Efficient Bayesian Pharmacometrics Modeling Using
+Stan and Torsten, Part i.”</span> <em>arXiv</em>.
+</div>
+</div>
 </div>
 
 
