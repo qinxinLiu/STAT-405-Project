@@ -71,7 +71,7 @@ The equations of one-compartment model with first order absorption are (@margoss
 $$u_{cent} = \frac{\text{conc}_{cent}}{V_{cent}},$$
 $$u'_{gut}(t) = -k_a u_{gut}(t),$$
 $$u'_{cent}(t) = -k_a u_{gut}(t) - \frac{CL}{V_{cent}}u_{cent}(t).$$
-The model describes how a drug is absorbed in the gut and then transitions into a single central compartment, and be cleared from the body across time. Here, $u$ denotes the drug mass ($mg$), $k_a$ the absorption rate ($h^{-1}$), $V$ the volume of compartment ($L$),and $CL$ the clearance rate ($L/h$).
+The model describes how a drug is absorbed in the gut and then transitions into a single central compartment, and be cleared from the body across time. Here, $u$ denotes the drug mass ($mg$). The model parameters are the absorption rate $k_a$ ($h^{-1}$), the volume of compartment $V$ ($L$),and the clearance rate $CL$ ($L/h$). The main difference between complete pooling and hierarchical modeling lies in how these parameters are modeled.
 
 ### Posterior Inference Methods
 The two posterior inference methods that will be compared are: Hamiltonian Monte Carlo (a sampling-based method), implemented in Stan, and variational inference (an optimization-based method). Convergence of HMC will be assessed with the effective sample size and trace plots. For the variational inference, we will look at the ELBO convergence. The runtime and posterior variance of the two posterior inference methods will be compared.
