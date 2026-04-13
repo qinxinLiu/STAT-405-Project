@@ -1,61 +1,61 @@
-library(Certara.RsNLME) # data
 library(dplyr)
 library(ggplot2)
 
 # DATA ----
 ## Dataset ----
-df <- pkData
+load(file = "data/warfarin.rda")
+df <- warfarin
 head(df)
 
-df$Gender <- as.factor(df$Gender)
-df$Subject <- as.factor(df$Subject)
+df <- df %>%
+  mutate(id = as.factor(id))
 
 
 ## Summary Statistics ----
 # mean and sd of numerical variables
 df %>%
-  distinct(Subject, Age, BodyWeight) %>%
-  summarise(mean_age = mean(Age), mean_weight = mean(BodyWeight),
-            sd_age = sd(Age), sd_weight = sd(BodyWeight))
+  distinct(id, age, wt) %>%
+  summarise(mean_age = mean(age), mean_weight = mean(wt),
+            sd_age = sd(age), sd_weight = sd(wt))
 
 # frequency table of categorical variables
 df %>% 
-  distinct(Subject, Gender) %>%
-  count(Gender)
+  distinct(id, sex) %>%
+  count(sex)
 
 # concentration by nominal time
 df %>% 
-  select(c(Nom_Time, Conc)) %>%
-  group_by(Nom_Time) %>%
-  summarise(avg = mean(Conc), sd = sd(Conc)) 
+  select(c(time, dv)) %>%
+  group_by(time) %>%
+  summarise(avg = mean(dv), sd = sd(dv)) 
 
 
 ## EDA ----
 # concentration by actual time
-ggplot(data = df, aes(y = Conc, x = Act_Time, colour = Subject, group = Subject))+
+ggplot(data = df, aes(y = dv, x = time, colour = id, group = id))+
   geom_point() +
   geom_line() +
-  labs(x = "Actual Time (h)", y = "Concentration") +
+  labs(x = "Actual Time (h)", y = "dventration") +
   theme_light()
 
-# log-concentration by nominal time
-ggplot(data = df, aes(y = log(Conc), x = Nom_Time, colour = Subject, group = Subject))+
+# log-dventration by nominal time
+ggplot(data = df, aes(y = log(dv), x = time, colour = id, group = id))+
   geom_point() +
   geom_line() +
   theme_light()
 
-# log-concentration by actual time and body weight
-ggplot(data = df, aes(y = log(Conc), x = Act_Time, colour = BodyWeight, group = Subject))+
+# log-dventration by actual time and body weight
+ggplot(data = df, aes(y = log(dv), x = time, colour = wt, group = id))+
   geom_point() +
   geom_line() +
-  labs(x = "Time (h)", y = "Concentration") +
+  labs(x = "Time (h)", y = "dventration") +
   scale_colour_viridis_c() +
   theme_light()
 
-# log-concentration by actual time, age and gender
-ggplot(data = df, aes(y = log(Conc), x = Act_Time, colour = Age, shape = Gender, group = Subject))+
+# log-dventration by actual time, age and sex
+ggplot(data = df, aes(y = log(dv), x = time, colour = age, shape = sex, group = id))+
   geom_point() +
   geom_line() +
-  labs(x = "Time (h)", y = "Concentration") +
+  labs(x = "Time (h)", y = "dventration") +
   scale_colour_viridis_c() +
   theme_light() 
