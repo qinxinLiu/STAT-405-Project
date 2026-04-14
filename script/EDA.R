@@ -23,39 +23,40 @@ df %>%
   distinct(id, sex) %>%
   count(sex)
 
-# concentration by nominal time
+df %>%
+  distinct(id, time) %>%
+  count(time)
+
+# concentration by time
 df %>% 
-  select(c(time, dv)) %>%
+  select(c(time, dv, dvid)) %>%
+  filter(dvid == "cp") %>%
   group_by(time) %>%
   summarise(avg = mean(dv), sd = sd(dv)) 
 
 
 ## EDA ----
-# concentration by actual time
-ggplot(data = df, aes(y = dv, x = time, colour = id, group = id))+
+# concentration by time
+ggplot(data = subset(df, dvid == "cp"), aes(y = dv, x = time, colour = id, group = id))+
   geom_point() +
   geom_line() +
-  labs(x = "Actual Time (h)", y = "dventration") +
+  labs(x = "Time (h)", y = "Concentration (mg/L)", colour = "Patient ID") +
   theme_light()
 
-# log-dventration by nominal time
-ggplot(data = df, aes(y = log(dv), x = time, colour = id, group = id))+
+# concentration by time and body weight
+ggplot(data = subset(df, dvid == "cp"), aes(y = dv, x = time, colour = wt, group = id))+
   geom_point() +
   geom_line() +
-  theme_light()
-
-# log-dventration by actual time and body weight
-ggplot(data = df, aes(y = log(dv), x = time, colour = wt, group = id))+
-  geom_point() +
-  geom_line() +
-  labs(x = "Time (h)", y = "dventration") +
+  labs(x = "Time (h)", y = "Concentration (mg/L)", colour = "Weight (kg)") +
   scale_colour_viridis_c() +
   theme_light()
 
-# log-dventration by actual time, age and sex
-ggplot(data = df, aes(y = log(dv), x = time, colour = age, shape = sex, group = id))+
+# concentration by time, age and sex
+ggplot(data = subset(df, dvid == "cp"), aes(y = dv, x = time, colour = age, shape = sex, linetype = sex, group = id))+
   geom_point() +
   geom_line() +
-  labs(x = "Time (h)", y = "dventration") +
+  labs(x = "Time (h)", y = "Concentrationv(mg/L)", colour = "Age (years)", linetype = "Sex", shape = "Sex") +
+  scale_linetype_manual(values = c("female" = "dashed", "male" = "solid")) +
+  scale_shape_manual(values = c("female" = 17, "male" = 19)) +
   scale_colour_viridis_c() +
   theme_light() 
