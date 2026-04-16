@@ -39,6 +39,7 @@ stan_data <- list(
   amt = dosing_data$amt
 )
 
+# HIERARCHICAL MODEL ----
 model <- stan_model(file = "/Users/griffinmcdonald/Documents/GitHub/STAT-405-Project/script/VI.stan")
 
 #Variational Inference (ADVI)
@@ -64,3 +65,6 @@ p3 <- mcmc_areas(posterior, pars="ka_pop", prob = 0.8) + ggtitle("Population Abs
 
 grid.arrange(p1, p2, p3, ncol = 1,top = "Posterior Distributions from VI")
 
+
+# COMPLETE POOLING MODEL ----
+model_CP <- stan_model(file = "script/VI_CP.stan")
