@@ -86,8 +86,8 @@ ggplot(data = elbo, aes(x = iter, y = ELBO)) +
 
 
 ## Quality of fit: Posterior predictive checks ----
-draws_CP <- vi_fit_CP$draws()
-y_sim <- posterior::as_draws_matrix(draws_CP[ , 7:253], variable = "^dv_sim")
+draws <- vi_fit$draws()
+y_sim <- posterior::as_draws_matrix(draws[ , 7:253], variable = "^dv_sim")
 y_obs <- stan_data$dv
 
 bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
@@ -149,6 +149,31 @@ y_sim <- posterior::as_draws_matrix(draws_CP[ , 7:253], variable = "^dv_sim")
 y_obs <- stan_data$dv
 
 bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
+
+ord <- order(stan_data$time)
+bayesplot::ppc_ribbon( # WRONG ***
+  x = stan_data$time[ord],
+  y = y_obs[ord],
+  yrep = y_sim[1:200, ord],
+  prob = 0.5, prob_outer = 0.9
+)
+
+#### TO TRY *****
+preds <- cbind(
+  Estimate = colMeans(y_sim), 
+  Q5 = apply(y_sim, 2, quantile, probs = 0.05),
+  Q95 = apply(y_sim, 2, quantile, probs = 0.95)
+)
+
+ggplot(cbind(obs_data, preds), aes(x = time, y = Estimate)) +
+  geom_smooth(aes(ymin = Q5, ymax = Q95), stat = "identity", linewidth = 0.5) +
+  geom_point(aes(y = dv)) + 
+  labs(
+    y = "Concentration (mg/L)", 
+    x = "Time (h)",
+    title = "90\% predictive intervals for CP"
+  ) +
+  theme_light()
 
 
 ## Predictive performance: LOOCV ----
