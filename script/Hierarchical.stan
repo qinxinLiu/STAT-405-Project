@@ -1,0 +1,95 @@
+data {
+  int<lower=1> N_obs;
+  int<lower=1> N_subj;
+  array[N_obs] int<lower=1, upper=N_subj> id;
+  vector[N_obs] time;
+  vector[N_obs] dv;
+  vector[N_subj] amt;
+}
+
+parameters {
+  // population parameters on log scale
+  real log_CL_pop;
+  real log_V_pop;
+  real log_ka_pop;
+
+  real<lower=0> sigma;
+
+  // random effects only for CL and V
+  real<lower=0> omega_CL;
+  real<lower=0> omega_V;
+
+  vector[N_subj] eta_CL;
+  vector[N_subj] eta_V;
+}
+
+transformed parameters {
+  // back-transform population parameters
+  real<lower=0> CL_pop = exp(log_CL_pop);
+  real<lower=0> V_pop  = exp(log_V_pop);
+  real<lower=0> ka_pop = exp(log_ka_pop);
+
+  vector<lower=0>[N_subj] CL;
+  vector<lower=0>[N_subj] V;
+
+  for (i in 1:N_subj) {
+    CL[i] = exp(log_CL_pop + omega_CL * eta_CL[i]);
+    V[i]  = exp(log_V_pop  + omega_V  * eta_V[i]);
+  }
+}
+
+model {
+  // shrunk priors on log scale
+  log_CL_pop ~ normal(log(0.2), 0.5);
+  log_V_pop  ~ normal(log(3.5), 0.5);
+  log_ka_pop ~ normal(log(1), 0.5);
+
+  sigma    ~ normal(0, 0.3);
+  omega_CL ~ normal(0, 0.3);
+  omega_V  ~ normal(0, 0.3);
+
+  eta_CL ~ std_normal();
+  eta_V  ~ std_normal();
+
+  for (i in 1:N_obs) {
+    real ke = CL[id[i]] / V[id[i]];
+    real dose = amt[id[i]];
+    real ka_subj = ka_pop;
+    real V_subj = V[id[i]];
+
+    real pred;
+    // Numerical stablization for k_a = k_e.
+    // Replace the direct computation with the limiting form of the original formula.
+    if (abs(ka_subj - ke) < 1e-6) { 
+      pred = (dose / V_subj) * ka_subj * time[i] * exp(-ke * time[i]);
+    }else {
+      pred = (dose * ka_subj / (V_subj * (ka_subj - ke))) *
+      (exp(-ke * time[i]) - exp(-ka_subj * time[i]));
+    }
+
+    dv[i] ~ lognormal(log(pred + 1e-6), sigma);
+  }
+}
+
+generated quantities {
+  vector[N_obs] dv_sim;
+
+  for (i in 1:N_obs) {
+    real ke = CL[id[i]] / V[id[i]];
+    real dose = amt[id[i]];
+    real ka_subj = ka_pop;
+    real V_subj = V[id[i]];
+
+    real pred;
+    // Numerical stablization for k_a = k_e.
+    // Replace the direct computation with the limiting form of the original formula.
+    if (abs(ka_subj - ke) < 1e-6) { 
+      pred = (dose / V_subj) * ka_subj * time[i] * exp(-ke * time[i]);
+    }else {
+      pred = (dose * ka_subj / (V_subj * (ka_subj - ke))) *
+      (exp(-ke * time[i]) - exp(-ka_subj * time[i]));
+    }
+
+    dv_sim[i] = lognormal_rng(log(pred + 1e-6), sigma);
+  }
+}
