@@ -73,6 +73,7 @@ model {
 
 generated quantities {
   vector[N_obs] dv_sim;
+  vector[N_obs] log_lik;
 
   for (i in 1:N_obs) {
     real ke = CL[id[i]] / V[id[i]];
@@ -91,5 +92,6 @@ generated quantities {
     }
 
     dv_sim[i] = lognormal_rng(log(pred + 1e-6), sigma);
+    log_lik[i] = lognormal_lpdf(dv[i] | log(pred + 1e-6), sigma);
   }
 }
