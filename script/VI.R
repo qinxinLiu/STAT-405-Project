@@ -1,9 +1,11 @@
 # Load required libraries
-library(rstan)
+library(rstan) # to remove probably
+library(cmdstanr)
 library(dplyr)
 library(ggplot2)
 library(bayesplot)
 library(gridExtra)
+library(tidyr)
 
 
 #Set rstan options for performance
@@ -66,5 +68,58 @@ p3 <- mcmc_areas(posterior, pars="ka_pop", prob = 0.8) + ggtitle("Population Abs
 grid.arrange(p1, p2, p3, ncol = 1,top = "Posterior Distributions from VI")
 
 
+
 # COMPLETE POOLING MODEL ----
-model_CP <- stan_model(file = "script/VI_CP.stan")
+model_CP <- cmdstan_model(stan_file = "script/VI_CP.stan")
+
+# Variational Inference (ADVI)
+set.seed(405)
+vi_fit_CP = model_CP$variational(
+  seed = 1,
+  refresh = 500,
+  algorithm = "meanfield",
+  output_samples = 2000,
+  iter = 10000,
+  data = stan_data
+)
+
+# Extract and Plot ELBO Convergence
+# rstan:::get_elbo(vi_fit_CP)
+# vi_CP_diag <- vi_fit_CP@sim$diagnostics
+# plot(vi_CP_diag$elbo, type = "l",
+#      main = "ELBO convergence",
+#      xlab = "Iteration",
+#      ylab = "ELBO")
+
+# Extract the posterior samples
+posterior_CP <- as.matrix(vi_fit_CP)
+
+# Create plots to compare VI posterior for each parameter
+posterior_all <- as.data.frame(rbind(posterior_CP[ , 1:3], posterior[ , 1:3]))
+posterior_all$model <- c(rep("Complete Pooling", times = 2000), rep("Hierarchical", times = 2000))
+posterior_long <- posterior_all %>%
+  select(model, CL_pop, V_pop, ka_pop) %>%
+  pivot_longer(cols = -model, names_to = "parameter", values_to = "value")
+
+ggplot(posterior_long, aes(x = value, fill = model)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~parameter, scales = "free", ncol = 1) +
+  labs(title = "Comparison of Approximate Posterior Distributions",
+       x = "Parameter value",
+       y = "Density",
+       fill = "Model") +
+  theme_light()
+
+
+## Convergence: ELBO ----
+# TO DO ####
+
+## Quality of fit: Posterior predictive checks ----
+draws_CP <- vi_fit_CP$draws()
+y_sim <- posterior::as_draws_matrix(draws_CP[ , 7:485], variable = "^dv_sim")
+y_obs <- stan_data$dv
+
+bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
+
+
+## Predictive performance: LOOCV ----

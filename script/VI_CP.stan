@@ -29,3 +29,16 @@ model {
     dv[i] ~ lognormal(log(pred + 1e-6), sigma); 
   }
 }
+
+generated quantities {
+  vector[N_obs] dv_sim;
+
+  for (i in 1:N_obs) {
+    real ke = CL_pop / V_pop;
+    real dose = amt[id[i]];
+    
+    real pred = (dose*ka_pop/(V_pop*(ka_pop - ke)))*(exp(-ke*time[i]) - exp(-ka_pop*time[i]));
+    
+    dv_sim[i] = lognormal_rng(log(pred + 1e-6), sigma);
+  }
+}
