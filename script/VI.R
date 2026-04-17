@@ -29,7 +29,7 @@ obs_data <- df |> filter(evid == 0, dv > 0) |> arrange(id, time)
 unique_ids <- unique(obs_data$id)
 ids <- data.frame(id = unique_ids, new_id = 1:length(unique_ids))
 
-obs_data <- obs_data |> left_join(ids, by = "id")
+obs_data <- obs_data |> left_join(ids, by = "id") |> filter(dvid == "cp")
 dosing_data <- dosing_data |> left_join(ids, by = "id") |> arrange(new_id)
 
 stan_data <- list(
@@ -80,16 +80,10 @@ vi_fit_CP = model_CP$variational(
   algorithm = "meanfield",
   output_samples = 2000,
   iter = 10000,
-  data = stan_data
+  data = stan_data,
+  eval_elbo = 50,
+  save_latent_dynamics = TRUE
 )
-
-# Extract and Plot ELBO Convergence
-# rstan:::get_elbo(vi_fit_CP)
-# vi_CP_diag <- vi_fit_CP@sim$diagnostics
-# plot(vi_CP_diag$elbo, type = "l",
-#      main = "ELBO convergence",
-#      xlab = "Iteration",
-#      ylab = "ELBO")
 
 # Extract the posterior samples
 posterior_CP <- as.matrix(vi_fit_CP)
@@ -112,11 +106,20 @@ ggplot(posterior_long, aes(x = value, fill = model)) +
 
 
 ## Convergence: ELBO ----
-# TO DO ####
+# median elbo converges at 350 iterations according to model fit
+vi_fit_CP$latent_dynamics_files() # to get values
+elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 350, by = 50)), 
+             ELBO = c(-959.23377, -573.38367, -550.74771, -547.61274, -547.51458, -549.86018, -547.08843)))
+
+ggplot(data = elbo, aes(x = iter, y = ELBO)) +
+  geom_line() +
+  labs(x = "Number of iterations") +
+  theme_light()
+  
 
 ## Quality of fit: Posterior predictive checks ----
 draws_CP <- vi_fit_CP$draws()
-y_sim <- posterior::as_draws_matrix(draws_CP[ , 7:485], variable = "^dv_sim")
+y_sim <- posterior::as_draws_matrix(draws_CP[ , 7:253], variable = "^dv_sim")
 y_obs <- stan_data$dv
 
 bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
