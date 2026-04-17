@@ -35,8 +35,8 @@ transformed parameters {
 }
 
 model {
-  CL_pop ~ lognormal(log(0.1), 1); 
-  V_pop ~ lognormal(log(8.0), 1);
+  CL_pop ~ lognormal(log(0.2), 1); 
+  V_pop ~ lognormal(log(3.5), 1);
   ka_pop ~ lognormal(log(1.0), 1);
   sigma ~ normal(0, 0.5);
 
@@ -57,5 +57,20 @@ model {
     real pred = (dose*ka_subj/(V_subj*(ka_subj - ke)))*(exp(-ke*time[i]) - exp(-ka_subj*time[i]));
     
     dv[i] ~ lognormal(log(pred + 1e-6), sigma); 
+  }
+}
+
+generated quantities {
+  vector[N_obs] dv_sim;
+
+  for (i in 1:N_obs) {
+    real ke = CL[id[i]] / V[id[i]];
+    real dose = amt[id[i]];
+    real ka_subj = ka[id[i]];
+    real V_subj = V[id[i]];
+    
+    real pred = (dose*ka_subj/(V_subj*(ka_subj - ke)))*(exp(-ke*time[i]) - exp(-ka_subj*time[i]));
+    
+    dv_sim[i] = lognormal_rng(log(pred + 1e-6), sigma); 
   }
 }
