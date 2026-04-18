@@ -219,3 +219,93 @@ ggplot(cbind(obs_data, preds), aes(x = time, y = Estimate)) +
 
 
 ## Predictive performance: LOOCV ----
+
+
+# MODEL EXTENSION ----
+model_ext <- cmdstan_model(stan_file = "script/ME.stan")
+
+# Gender
+sex <- obs_data |>
+  group_by(new_id) |>
+  slice(1) |>
+  ungroup() |>
+  pull(sex)
+sex <- factor(sex, levels = c("male", "female"))
+gender<- as.integer(sex) - 1
+
+# Data for model extension
+stan_data_ext <- list(
+  N_obs = nrow(obs_data),
+  N_subj = length(unique_ids),
+  id = obs_data$new_id,
+  time = obs_data$time,
+  dv = obs_data$dv,
+  amt = dosing_data$amt,
+  gender = gender
+)
+
+#Variational Inference (ADVI)
+set.seed(405)
+vi_fit_ext <- model_ext$variational(
+  seed = 1,
+  refresh = 500,
+  algorithm = "meanfield",
+  output_samples = 2000,
+  iter = 10000,
+  data = stan_data_ext,
+  eval_elbo = 50,
+  save_latent_dynamics = TRUE
+)
+
+# Extract the posterior samples
+draws_ext <- vi_fit_ext$draws()
+posterior_ext <- posterior::as_draws_matrix(draws_ext)
+
+
+## Convergence: ELBO ----
+# median elbo converges at 350 iterations according to model fit
+vi_fit_ext$latent_dynamics_files() # to get values
+elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 550, by = 50)), 
+                            ELBO = c(-886.40897,
+                                     -739.84712,
+                                     -633.44807,
+                                     -559.17576,
+                                     -549.8991,
+                                     -547.9312,
+                                     -550.27883,
+                                     -549.76396,
+                                     -549.22639,
+                                     -547.50176,
+                                     -547.73766
+                            )))
+
+ggplot(data = elbo, aes(x = iter, y = ELBO)) +
+  geom_line() +
+  labs(x = "Number of iterations") +
+  theme_light()
+
+
+## Quality of fit: Posterior predictive checks ----
+draws_ext <- vi_fit_ext$draws()
+y_sim <- posterior::as_draws_matrix(draws_ext[ , 7:253], variable = "^dv_sim")
+y_obs <- stan_data$dv
+
+bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
+
+# 90% predictive intervals
+preds <- cbind(
+  Estimate = colMeans(y_sim), 
+  Q5 = apply(y_sim, 2, quantile, probs = 0.05),
+  Q95 = apply(y_sim, 2, quantile, probs = 0.95)
+)
+
+ggplot(cbind(obs_data, preds), aes(x = time, y = Estimate)) +
+  geom_smooth(aes(ymin = Q5, ymax = Q95), stat = "identity", linewidth = 0.5) +
+  geom_point(aes(y = dv)) + 
+  labs(
+    y = "Concentration (mg/L)", 
+    x = "Time (h)",
+    title = "90% predictive intervals for CP"
+  ) +
+  facet_wrap(~ id, nrow = 5) +
+  theme_light()
