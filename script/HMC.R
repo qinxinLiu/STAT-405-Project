@@ -7,6 +7,7 @@ library(gridExtra)
 library(tidyr)
 library(posterior)
 library(loo)
+library(stringr)
 
 setwd("/Users/jessieliu/Desktop/Msc Statistics/2025 Winter Term 2/STAT 405/STAT-405-Project")
 
@@ -40,6 +41,15 @@ stan_data <- list(
   amt = dosing_data$amt
 )
 
+## Gender 
+sex <- obs_data |>
+  group_by(new_id) |>
+  slice(1) |>
+  ungroup() |>
+  pull(sex)
+sex <- factor(sex, levels = c("male", "female"))
+gender<- as.integer(sex) - 1
+
 
 # COMPLETE POOLING ----
 
@@ -68,6 +78,8 @@ hmc_fit_cp <- mod$sample(data = stan_data,
                      iter_sampling = 8000, 
                      show_messages = FALSE)
 
+## Computation time
+hmc_fit_cp$time()
 
 ## Filter the unconverged posterior parameters.
 hmc_fit_cp$summary() |>
@@ -189,18 +201,6 @@ hmc_fit_h_notwork$summary() |>
 
 ## Create a stan object for Hierarchical model
 mod_h <- cmdstan_model("Hierarchical.stan")
-init_fun <- function() {
-  list(
-    log_CL_pop = rnorm(1, log(0.2), 0.05),
-    log_V_pop  = rnorm(1, log(3.5), 0.05),
-    log_ka_pop = rnorm(1, log(1.0), 0.05),
-    sigma    = runif(1, 0.08, 0.3),
-    omega_CL = runif(1, 0.05, 0.3),
-    omega_V  = runif(1, 0.05, 0.3),
-    eta_CL = rnorm(stan_data$N_subj, 0, 0.5),
-    eta_V  = rnorm(stan_data$N_subj, 0, 0.5)
-  )
-}
 
 hmc_fit_h <- mod_h$sample(
   data = stan_data,
@@ -212,6 +212,9 @@ hmc_fit_h <- mod_h$sample(
   adapt_delta = 0.99,
   max_treedepth = 12
 )
+
+## Computation time
+hmc_fit_h$time()
 
 ## Filter the unconverged posterior parameters.
 hmc_fit_h$summary() |>
@@ -232,7 +235,7 @@ subj_pars <- c(
   "eta_CL[1]", #male
   "eta_CL[14]", #female
   "eta_V[1]",
-  "eta_V[14]" 
+  "eta_V[14]"
 )
 
 
@@ -241,14 +244,54 @@ hmc_fit_h$summary(variables = subj_pars)
 
 ## Trace plot ---- 
 mcmc_trace(
-  hmc_fit_h$draws(variables = pop_pars),
-  facet_args = list(ncol = 3)
+  hmc_fit_h$draws(variables = c(pop_pars,subj_pars)),
+  facet_args = list(ncol = 4)
 )
 
-mcmc_trace(
-  hmc_fit_h$draws(variables = subj_pars),
-  facet_args = list(ncol = 2)
+
+
+## Caterpillar Plot of Random Effects -----
+subj_info <- data.frame(
+  subject = 1:32,
+  gender = sex
 )
+
+
+V_sum <- hmc_fit_h$summary("V") %>%
+  mutate(subject = as.integer(str_extract(variable, "\\d+"))) %>%
+  left_join(subj_info, by = "subject") %>%
+  arrange(median) %>%
+  mutate(subject_plot = factor(subject, levels = subject))
+
+ggplot(V_sum, aes(x = mean, y = subject_plot)) +
+  geom_errorbarh(aes(xmin = q5, xmax = q95, color = gender),
+                 height = 0.2, linewidth = 0.6) +
+  geom_point(size = 2, color = "black") +
+  labs(
+    x = "Posterior mean and 90% credible interval",
+    y = "Subject",
+    color = "Gender"
+  ) +
+  theme_bw()
+
+
+CL_sum <- hmc_fit_h$summary("CL") %>%
+  mutate(subject = as.integer(str_extract(variable, "\\d+"))) %>%
+  left_join(subj_info, by = "subject") %>%
+  arrange(median) %>%
+  mutate(subject_plot = factor(subject, levels = subject))
+
+ggplot(CL_sum, aes(x = mean, y = subject_plot)) +
+  geom_errorbarh(aes(xmin = q5, xmax = q95, color = gender),
+                 height = 0.2, linewidth = 0.6) +
+  geom_point(size = 2, color = "black") +
+  labs(
+    x = "Posterior median and 90% credible interval",
+    y = "Subject",
+    color = "Gender"
+  ) +
+  theme_bw()
+
 
 ## Posterior predictive check ----
 
@@ -280,8 +323,7 @@ ggplot(hmc_ppc_df_h, aes(x = time)) +
   facet_wrap(~ id, scales = "free_y") +
   labs(
     x = "Time",
-    y = "Concentration",
-    title = "Posterior predictive check: concentration vs time"
+    y = "Concentration"
   ) +
   theme_bw()
 
@@ -313,16 +355,6 @@ hmc_bad_points_h <- data.frame(
 
 
 # MODEL EXTENSION ----
-
-## Gender ----
-sex <- obs_data |>
-  group_by(new_id) |>
-  slice(1) |>
-  ungroup() |>
-  pull(sex)
-sex <- factor(sex, levels = c("male", "female"))
-gender<- as.integer(sex) - 1
-
 
 
 ## Data for model extension
@@ -372,6 +404,9 @@ hmc_fit_e <- mod_e$sample(
   max_treedepth = 12
 )
 
+## Run time
+hmc_fit_e$time()
+
 ## Filter the unconverged posterior parameters.
 hmc_fit_e$summary() |>
   filter(rhat > 1.05) |>
@@ -379,9 +414,9 @@ hmc_fit_e$summary() |>
 
 
 pop_pars_e <- c(
-  "log_CL_pop",
-  "log_V_pop",
-  "log_ka_pop",
+  "CL_pop",
+  "V_pop",
+  "ka_pop",
   "sigma",
   "beta_CL",
   "beta_V",
@@ -401,14 +436,10 @@ hmc_fit_e$summary(variables = subj_pars)
 
 ## Trace plot ---- 
 mcmc_trace(
-  hmc_fit_e$draws(variables = pop_pars_e),
-  facet_args = list(ncol = 2)
+  hmc_fit_e$draws(variables = c(pop_pars_e,subj_pars_e)),
+  facet_args = list(ncol = 3)
 )
 
-mcmc_trace(
-  hmc_fit_e$draws(variables = subj_pars_e),
-  facet_args = list(ncol = 2)
-)
 
 ## Gender effect
 gender_pars_e <- c("beta_CL", "beta_V")
@@ -417,6 +448,48 @@ mcmc_trace(
   hmc_fit_e$draws(variables = gender_pars_e),
   facet_args = list(ncol = 2)
 )
+
+## Caterpillar Plot of Random Effects -----
+subj_info <- data.frame(
+  subject = 1:32,
+  gender = sex
+)
+
+V_sum <- hmc_fit_e$summary("V") %>%
+  mutate(subject = as.integer(str_extract(variable, "\\d+"))) %>%
+  left_join(subj_info, by = "subject") %>%
+  arrange(median) %>%
+  mutate(subject_plot = factor(subject, levels = subject))
+
+ggplot(V_sum, aes(x = median, y = subject_plot)) +
+  geom_errorbarh(aes(xmin = q5, xmax = q95, color = gender),
+                 height = 0.2, linewidth = 0.6) +
+  geom_point(size = 2, color = "black") +
+  labs(
+    x = "Posterior median and 90% credible interval",
+    y = "Subject",
+    color = "Gender"
+  ) +
+  theme_bw()
+
+
+CL_sum <- hmc_fit_e$summary("CL") %>%
+  mutate(subject = as.integer(str_extract(variable, "\\d+"))) %>%
+  left_join(subj_info, by = "subject") %>%
+  arrange(median) %>%
+  mutate(subject_plot = factor(subject, levels = subject))
+
+ggplot(CL_sum, aes(x = median, y = subject_plot)) +
+  geom_errorbarh(aes(xmin = q5, xmax = q95, color = gender),
+                 height = 0.2, linewidth = 0.6) +
+  geom_point(size = 2, color = "black") +
+  labs(
+    x = "Posterior median and 90% credible interval",
+    y = "Subject",
+    color = "Gender"
+  ) +
+  theme_bw()
+
 
 ## Posterior predictive check ----
 
@@ -468,30 +541,29 @@ ggplot(hmc_ppc_df_e, aes(x = time, color = gender, fill = gender)) +
   facet_wrap(~ id, scales = "free_y") +
   labs(
     x = "Time",
-    y = "Concentration",
-    title = "Posterior predictive check by subject and gender"
+    y = "Concentration"
   ) +
   theme_bw()
 
 
-hmc_ppc_df_e2 <- hmc_ppc_df_e |>
-  group_by(gender, id) |>
-  mutate(id_index = cur_group_id()) |>
-  ungroup()
-
-ggplot(hmc_ppc_df_e2, aes(x = time, group = id, color = id_index)) +
-  geom_line(aes(y = pred_med), linewidth = 0.8, alpha = 0.9) +
-  geom_point(aes(y = dv_obs), size = 1, alpha = 0.7) +
-  facet_wrap(~ gender, ncol = 1, scales = "free_y") +
-  scale_color_viridis_c() +
-  labs(
-    x = "Time",
-    y = "Concentration",
-    color = "Subject index",
-    title = "Posterior predictive concentration-time profiles by gender"
-  ) +
-  theme_bw()
-
+# hmc_ppc_df_e2 <- hmc_ppc_df_e |>
+#   group_by(gender, id) |>
+#   mutate(id_index = cur_group_id()) |>
+#   ungroup()
+# 
+# ggplot(hmc_ppc_df_e2, aes(x = time, group = id, color = id_index)) +
+#   geom_line(aes(y = pred_med), linewidth = 0.8, alpha = 0.9) +
+#   geom_point(aes(y = dv_obs), size = 1, alpha = 0.7) +
+#   facet_wrap(~ gender, ncol = 1, scales = "free_y") +
+#   scale_color_viridis_c() +
+#   labs(
+#     x = "Time",
+#     y = "Concentration",
+#     color = "Subject index",
+#     title = "Posterior predictive concentration-time profiles by gender"
+#   ) +
+#   theme_bw()
+# 
 
 
 
