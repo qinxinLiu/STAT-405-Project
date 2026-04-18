@@ -265,18 +265,30 @@ posterior_ext <- posterior::as_draws_matrix(draws_ext)
 ## Convergence: ELBO ----
 # median elbo converges at 350 iterations according to model fit
 vi_fit_ext$latent_dynamics_files() # to get values
-elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 550, by = 50)), 
-                            ELBO = c(-886.40897,
-                                     -739.84712,
-                                     -633.44807,
-                                     -559.17576,
-                                     -549.8991,
-                                     -547.9312,
-                                     -550.27883,
-                                     -549.76396,
-                                     -549.22639,
-                                     -547.50176,
-                                     -547.73766
+elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 1100, by = 50)), 
+                            ELBO = c(-869.97425,
+                                     -563.66845,
+                                     -533.40084,
+                                     -552.16894,
+                                     -514.04264,
+                                     -512.29236,
+                                     -514.83782,
+                                     -511.75054,
+                                     -517.52108,
+                                     -512.9051,
+                                     -521.50707,
+                                     -535.66194,
+                                     -511.18953,
+                                     -511.7233,
+                                     -515.43701,
+                                     -515.71281,
+                                     -514.34929,
+                                     -508.44704,
+                                     -511.83623,
+                                     -509.47202,
+                                     -520.86266,
+                                     -515.85726
+                                     
                             )))
 
 ggplot(data = elbo, aes(x = iter, y = ELBO)) +
