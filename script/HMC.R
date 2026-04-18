@@ -437,7 +437,7 @@ hmc_fit_e$summary(variables = subj_pars)
 ## Trace plot ---- 
 mcmc_trace(
   hmc_fit_e$draws(variables = c(pop_pars_e,subj_pars_e)),
-  facet_args = list(ncol = 3)
+  facet_args = list(ncol = 4)
 )
 
 
@@ -519,7 +519,7 @@ hmc_ppc_df_e <- tibble(
   ) |>
   arrange(id, time)
 
-## Orignal plot
+## Original plot
 ggplot(hmc_ppc_df_e, aes(x = time)) +
   geom_ribbon(aes(ymin = pred_lwr, ymax = pred_upr), alpha = 0.25) +
   geom_line(aes(y = pred_med), linewidth = 0.7) +
@@ -630,3 +630,57 @@ hmc_bad_points_e <- data.frame(
 
 
 # HMC MODEL COMPARISON ----
+
+## Compare CP and H ----
+## posterior_CP: HMC draws from complete pooling
+## posterior_h:    HCMI draws from hierarchical model
+
+## Extract HMC posterior draws
+posterior_cp_hmc <- as_draws_df(
+  hmc_fit_cp$draws(variables = c("CL_pop", "V_pop", "ka_pop"))
+)
+
+posterior_h_hmc <- as_draws_df(
+  hmc_fit_h$draws(variables = c("CL_pop", "V_pop", "ka_pop"))
+)
+
+
+## Combine two models
+posterior_all_hmc <- bind_rows(
+  posterior_cp_hmc %>%
+    transmute(
+      CL_pop = CL_pop,
+      V_pop  = V_pop,
+      ka_pop = ka_pop,
+      model  = "Complete Pooling"
+    ),
+  posterior_h_hmc %>%
+    transmute(
+      CL_pop = CL_pop,
+      V_pop  = V_pop,
+      ka_pop = ka_pop,
+      model  = "Hierarchical"
+    )
+)
+
+## Convert to long format
+posterior_long_hmc <- posterior_all_hmc %>%
+  pivot_longer(
+    cols = c(CL_pop, V_pop, ka_pop),
+    names_to = "parameter",
+    values_to = "value"
+  ) %>%
+  mutate(
+    parameter = factor(parameter, levels = c("CL_pop", "V_pop", "ka_pop"))
+  )
+
+## Plot
+ggplot(posterior_long_hmc, aes(x = value, fill = model)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~ parameter, scales = "free", ncol = 1) +
+  labs(
+    x = "Parameter value",
+    y = "Density",
+    fill = "Model"
+  ) +
+  theme_light()
