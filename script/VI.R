@@ -11,7 +11,7 @@ library(tidyr)
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
-load(file = "/Users/griffinmcdonald/Documents/GitHub/STAT-405-Project/data/warfarin.rda")
+load(file = "data/warfarin.rda")
 df <- warfarin
 #colnames(warfarin)
 #Preprocessing
@@ -41,7 +41,7 @@ stan_data <- list(
 )
 
 # HIERARCHICAL MODEL ----
-model <- cmdstan_model(stan_file = "script/VI.stan")
+model <- cmdstan_model(stan_file = "script/Hierarchical.stan")
 
 #Variational Inference (ADVI)
 set.seed(405)
@@ -73,11 +73,31 @@ grid.arrange(p1, p2, p3, ncol = 1,top = "Posterior Distributions from VI")
 ## Convergence: ELBO ----
 # median elbo converges at 350 iterations according to model fit
 vi_fit$latent_dynamics_files() # to get values
-elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 1250, by = 50)), 
-                            ELBO = c(-1214.1587, -637.63347, -534.39619, -517.94317, -499.31439, -516.95692, -501.52201, -524.63026,
-                                     -491.76562, -491.77044, -491.23451, -490.04772, -493.21914, -487.74156, -491.67, -499.65043,
-                                     -488.46793, -484.90054, -487.1417, -487.51891, -483.75927, -492.11146, -487.25793, -492.26324,
-                                     -490.06753)))
+elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 1100, by = 50)), 
+                            ELBO = c(-977.78498
+                                     -610.55066,
+                                     -584.79822,
+                                     -532.7852,
+                                     -540.29097,
+                                     -520.37681,
+                                     -530.3298,
+                                     -516.87348,
+                                     -515.33438,
+                                     -517.60476,
+                                     -516.0683,
+                                     -515.55344,
+                                     -514.47138,
+                                     -527.63497,
+                                     -516.85296,
+                                     -515.93813,
+                                     -513.27726,
+                                     -515.1719,
+                                     -513.61062,
+                                     -515.5289,
+                                     -523.15042,
+                                     -517.09038,
+                                     -513.75776
+                            )))
 
 ggplot(data = elbo, aes(x = iter, y = ELBO)) +
   geom_line() +
@@ -92,10 +112,28 @@ y_obs <- stan_data$dv
 
 bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
 
+# 90% predictive intervals
+preds <- cbind(
+  Estimate = colMeans(y_sim), 
+  Q5 = apply(y_sim, 2, quantile, probs = 0.05),
+  Q95 = apply(y_sim, 2, quantile, probs = 0.95)
+)
+
+ggplot(cbind(obs_data, preds), aes(x = time, y = Estimate)) +
+  geom_smooth(aes(ymin = Q5, ymax = Q95), stat = "identity", linewidth = 0.5) +
+  geom_point(aes(y = dv)) + 
+  labs(
+    y = "Concentration (mg/L)", 
+    x = "Time (h)",
+    title = "90% predictive intervals for Hierarchical"
+  ) +
+  facet_wrap(~ id, nrow = 5) +
+  theme_light()
+
 
 
 # COMPLETE POOLING MODEL ----
-model_CP <- cmdstan_model(stan_file = "script/VI_CP.stan")
+model_CP <- cmdstan_model(stan_file = "script/CP2.stan")
 
 # Variational Inference (ADVI)
 set.seed(405)
@@ -118,10 +156,10 @@ posterior_CP <- posterior::as_draws_matrix(draws_CP)
 posterior_all <- as.data.frame(rbind(posterior_CP[ , 3:5], posterior[ , 3:5]))
 posterior_all$model <- c(rep("Complete Pooling", times = 2000), rep("Hierarchical", times = 2000))
 posterior_long <- posterior_all %>%
-  select(model, CL_pop, V_pop, ka_pop) %>%
-  pivot_longer(cols = -model, names_to = "parameter", values_to = "value")
+  select(model, log_CL, log_V, log_ka) %>%
+  pivot_longer(cols = -model, names_to = "parameter", values_to = "log_value")
 
-ggplot(posterior_long, aes(x = value, fill = model)) +
+ggplot(posterior_long, aes(x = exp(log_value), fill = model)) +
   geom_density(alpha = 0.4) +
   facet_wrap(~parameter, scales = "free", ncol = 1) +
   labs(title = "Comparison of Approximate Posterior Distributions",
@@ -134,8 +172,19 @@ ggplot(posterior_long, aes(x = value, fill = model)) +
 ## Convergence: ELBO ----
 # median elbo converges at 350 iterations according to model fit
 vi_fit_CP$latent_dynamics_files() # to get values
-elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 350, by = 50)), 
-             ELBO = c(-959.23377, -573.38367, -550.74771, -547.61274, -547.51458, -549.86018, -547.08843)))
+elbo <- as.data.frame(cbind(iter = c(seq(from = 50, to = 550, by = 50)), 
+             ELBO = c(-886.40897,
+                      -739.84712,
+                      -633.44807,
+                      -559.17576,
+                      -549.8991,
+                      -547.9312,
+                      -550.27883,
+                      -549.76396,
+                      -549.22639,
+                      -547.50176,
+                      -547.73766
+             )))
 
 ggplot(data = elbo, aes(x = iter, y = ELBO)) +
   geom_line() +
@@ -150,15 +199,7 @@ y_obs <- stan_data$dv
 
 bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
 
-ord <- order(stan_data$time)
-bayesplot::ppc_ribbon( # WRONG ***
-  x = stan_data$time[ord],
-  y = y_obs[ord],
-  yrep = y_sim[1:200, ord],
-  prob = 0.5, prob_outer = 0.9
-)
-
-#### TO TRY *****
+# 90% predictive intervals
 preds <- cbind(
   Estimate = colMeans(y_sim), 
   Q5 = apply(y_sim, 2, quantile, probs = 0.05),
@@ -171,8 +212,9 @@ ggplot(cbind(obs_data, preds), aes(x = time, y = Estimate)) +
   labs(
     y = "Concentration (mg/L)", 
     x = "Time (h)",
-    title = "90\% predictive intervals for CP"
+    title = "90% predictive intervals for CP"
   ) +
+  facet_wrap(~ id, nrow = 5) +
   theme_light()
 
 
