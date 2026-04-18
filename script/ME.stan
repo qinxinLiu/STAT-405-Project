@@ -30,6 +30,9 @@ parameters {
 }
 
 transformed parameters {
+    // back-transform population parameters
+  real<lower=0> CL_pop = exp(log_CL_pop);
+  real<lower=0> V_pop  = exp(log_V_pop);
   real<lower=0> ka_pop = exp(log_ka_pop);
 
   vector<lower=0>[N_subj] CL;
