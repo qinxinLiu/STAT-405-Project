@@ -74,8 +74,10 @@ hmc_fit_cp$summary() |>
   filter(rhat > 1.05) |>
   print(n = Inf)
 
+hmc_pars_cp <- c("CL_pop", "V_pop", "ka_pop", "sigma")
+hmc_fit_cp$summary(variables = hmc_pars_cp)
+
 ## Trace plot ----
-hmc_pars_cp <- c("log_CL", "log_V", "log_ka", "sigma")
 
 mcmc_trace(
   hmc_fit_cp$draws(variables = hmc_pars_cp),
@@ -113,8 +115,7 @@ ggplot(hmc_ppc_df_cp, aes(x = time)) +
   facet_wrap(~ id, scales = "free_y") +
   labs(
     x = "Time",
-    y = "Concentration",
-    title = "Posterior predictive check: concentration vs time"
+    y = "Concentration"
   ) +
   theme_bw()
 
@@ -149,9 +150,8 @@ hmc_bad_points_cp <- data.frame(
 
 # HIERARCHICAL MODEL ----
 
+
 ## Model Fitting ----
-## Create a stan object for Hierarchical model
-mod_h <- cmdstan_model("Hierarchical.stan")
 
 ## Define initialization function
 init_fun <- function() {
@@ -167,6 +167,40 @@ init_fun <- function() {
   )
 }
 
+# Trace plot of add random effect to all pk parameters
+
+## Create a stan object for Full Random-Effect Hierarchical model
+mod_h_notwork <- cmdstan_model("VI.stan")
+hmc_fit_h_notwork <- mod_h_notwork$sample(
+  data = stan_data,
+  init = init_fun,
+  chains = 4,
+  parallel_chains = 4,
+  iter_warmup = 2000,
+  iter_sampling = 8000,
+  adapt_delta = 0.99,
+  max_treedepth = 12
+)
+## Filter the unconverged posterior parameters.
+hmc_fit_h_notwork$summary() |>
+  filter(rhat > 1.05) |>
+  print(n = Inf)
+
+
+## Create a stan object for Hierarchical model
+mod_h <- cmdstan_model("Hierarchical.stan")
+init_fun <- function() {
+  list(
+    log_CL_pop = rnorm(1, log(0.2), 0.05),
+    log_V_pop  = rnorm(1, log(3.5), 0.05),
+    log_ka_pop = rnorm(1, log(1.0), 0.05),
+    sigma    = runif(1, 0.08, 0.3),
+    omega_CL = runif(1, 0.05, 0.3),
+    omega_V  = runif(1, 0.05, 0.3),
+    eta_CL = rnorm(stan_data$N_subj, 0, 0.5),
+    eta_V  = rnorm(stan_data$N_subj, 0, 0.5)
+  )
+}
 
 hmc_fit_h <- mod_h$sample(
   data = stan_data,
@@ -184,28 +218,31 @@ hmc_fit_h$summary() |>
   filter(rhat > 1.05) |>
   print(n = Inf)
 
-## Trace plot ---- 
 pop_pars <- c(
-  "lp__", #log posterior density
-  "log_CL_pop",
-  "log_V_pop",
-  "log_ka_pop",
+  "CL_pop",
+  "V_pop",
+  "ka_pop",
+  "sigma",
   "omega_CL",
   "omega_V"
 )
 
+# Randomly drawn subject-specific parameters
 subj_pars <- c(
-  "eta_CL[1]",
-  "eta_CL[15]",
-  "eta_CL[29]",
+  "eta_CL[1]", #male
+  "eta_CL[14]", #female
   "eta_V[1]",
-  "eta_V[15]",
-  "eta_V[29]"
+  "eta_V[14]" 
 )
 
+
+hmc_fit_h$summary(variables = pop_pars)
+hmc_fit_h$summary(variables = subj_pars)
+
+## Trace plot ---- 
 mcmc_trace(
   hmc_fit_h$draws(variables = pop_pars),
-  facet_args = list(ncol = 2)
+  facet_args = list(ncol = 3)
 )
 
 mcmc_trace(
@@ -340,11 +377,8 @@ hmc_fit_e$summary() |>
   filter(rhat > 1.05) |>
   print(n = Inf)
 
-hmc_fit_e$summary()
 
-## Trace plot ---- 
 pop_pars_e <- c(
-  "lp__",         # log posterior density
   "log_CL_pop",
   "log_V_pop",
   "log_ka_pop",
@@ -357,13 +391,15 @@ pop_pars_e <- c(
 
 subj_pars_e <- c(
   "eta_CL[1]",
-  "eta_CL[15]",
-  "eta_CL[29]",
+  "eta_CL[14]",
   "eta_V[1]",
-  "eta_V[15]",
-  "eta_V[29]"
+  "eta_V[14]"
 )
 
+hmc_fit_e$summary(variables = pop_pars_e)
+hmc_fit_e$summary(variables = subj_pars)
+
+## Trace plot ---- 
 mcmc_trace(
   hmc_fit_e$draws(variables = pop_pars_e),
   facet_args = list(ncol = 2)
