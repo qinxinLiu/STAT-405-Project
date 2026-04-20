@@ -297,12 +297,66 @@ ggplot(data = elbo, aes(x = iter, y = ELBO)) +
   theme_light()
 
 
-## Quality of fit: Posterior predictive checks ----
+## Quality of fit: Posterior predictive checks
 draws_ext <- vi_fit_ext$draws()
 y_sim <- posterior::as_draws_matrix(draws_ext[ , 7:253], variable = "^dv_sim")
 y_obs <- stan_data$dv
 
 bayesplot::ppc_dens_overlay(y_obs, y_sim[1:200, ])
+
+VI_ppc_df_e <- tibble(
+  obs = seq_len(ncol(VI_gend)),
+  id = stan_data_ext$id,
+  time = stan_data_ext$time,
+  dv_obs = stan_data_ext$dv,
+  
+  gender_num = stan_data_ext$gender[stan_data_ext$id],
+  
+  pred_med = apply(VI_gend, 2, median),
+  pred_lwr = apply(VI_gend, 2, quantile, probs = 0.05),
+  pred_upr = apply(VI_gend, 2, quantile, probs = 0.95)
+) |>
+  mutate(
+    gender = factor(gender_num, levels = c(0, 1), labels = c("Male", "Female"))
+  ) |>
+  arrange(id, time)
+
+gender_band <- VI_ppc_df_e |>
+  group_by(time, gender) |>
+  summarize(
+    band_med = median(pred_med),
+    band_lwr = median(pred_lwr), 
+    band_upr = median(pred_upr),
+    .groups = "drop"
+  )
+
+ggplot() +
+  geom_ribbon(
+    data = gender_band,
+    aes(x = time, ymin = band_lwr, ymax = band_upr, fill = gender),
+    alpha = 0.2
+  ) +
+  geom_line(
+    data = VI_ppc_df_e,
+    aes(x = time, y = pred_med, group = id, color = gender),
+    alpha = 0.25,
+    linewidth = 0.5
+  ) +
+  geom_line(
+    data = gender_band,
+    aes(x = time, y = band_med, color = gender),
+    linewidth = 1.2
+  ) +
+  labs(
+    x = "Time (h)",
+    y = "Concentration (mg/L)",
+    color = "Gender",
+    fill = "Gender",
+    title = "VI Posterior Predictive Concentration Over Time by Gender"
+  ) +
+  theme_bw() +
+  scale_fill_manual(values = c("Male" = "#F8766D", "Female" = "#00BFC4")) +
+  scale_color_manual(values = c("Male" = "#F8766D", "Female" = "#00BFC4"))
 
 # 90% predictive intervals
 preds <- cbind(
@@ -321,3 +375,53 @@ ggplot(cbind(obs_data, preds), aes(x = time, y = Estimate)) +
   ) +
   facet_wrap(~ id, nrow = 5) +
   theme_light()
+
+
+# Extract summary for the Complete Pooling model
+cp_summary <- vi_fit_CP$summary(
+  variables = c("sigma")
+)
+print(cp_summary[, c("variable", "mean", "sd", "q5", "q95")])
+
+# Extract summary for the Hierarchical model
+hier_summary <- vi_fit$summary(
+  variables = c("sigma")
+)
+print(hier_summary[, c("variable", "mean", "sd", "q5", "q95")])
+
+
+# Extract summary for the Extended model
+ext_summary <- vi_fit_ext$summary(
+  variables = c("beta_CL","beta_V")
+)
+
+print(ext_summary[, c("variable", "mean", "sd", "q5", "q95")])
+
+time_cp <- vi_fit_CP$time()$total
+time_hier <- vi_fit$time()$total
+time_ext <- vi_fit_ext$time()$total
+runtimes <- data.frame(
+  Model = c("Complete Pooling", "Hierarchical", "Extended"),
+  Runtime_Seconds = c(time_cp, time_hier, time_ext)
+)
+print(runtimes)
+
+
+library(loo)
+#Complete Pooling Model LOO
+log_lik_cp <- vi_fit_CP$draws("log_lik", format = "matrix")
+# Calculate LOO-CV
+loo_cp <- loo(log_lik_cp)
+pareto_k_table(loo_cp)
+plot(loo_cp)
+# Hierarchical Model LOO ---
+log_lik_hier <- vi_fit$draws("log_lik", format = "matrix")
+loo_hier <- loo(log_lik_hier)
+pareto_k_table(loo_hier)
+plot(loo_hier)
+# Extended Model LOO ---
+log_lik_ext <- vi_fit_ext$draws("log_lik", format = "matrix")
+loo_ext <- loo(log_lik_ext)
+pareto_k_table(loo_ext)
+plot(loo_ext)
+
